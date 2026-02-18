@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  # Servicio 1: Tu Base de Datos
+  postgres_db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: crypto_dw
+    ports:
+      - "5432:5432"  # Para que puedas conectarte desde tu PC (DBeaver/TablePlus)
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Servicio 2: Tu ETL
+  etl_script:
+    build: ./app
+    depends_on:
+      - postgres_db  # Espera a que la DB arranque (conceptualmente)
+    environment:
+      DATABASE_URL: postgresql://user:password@postgres_db:5432/crypto_dw
+    restart: on-failure  # Si falla (ej. DB no lista), reintenta
+
+volumes:
+  postgres_data:
